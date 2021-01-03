@@ -1,6 +1,7 @@
 package io.github.kirill5k.telegrambot.common
 
 import cats.effect.{Blocker, ContextShift, Sync}
+import io.github.kirill5k.telegrambot.clients.ChatId
 import pureconfig.generic.auto._
 import pureconfig.module.catseffect.syntax._
 import pureconfig.ConfigSource
@@ -12,8 +13,15 @@ object config {
       port: Int
   )
 
+  final case class TelegramConfig(
+      baseUri: String,
+      botKey: String,
+      chatId: ChatId
+  )
+
   final case class AppConfig(
-      server: ServerConfig
+      server: ServerConfig,
+      telegram: TelegramConfig
   )
 
   object AppConfig {
