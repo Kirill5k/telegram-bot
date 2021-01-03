@@ -48,14 +48,14 @@ final private class LiveTelegramClient[F[_]](
     Stream
       .unfoldLoopEval(0L) { o =>
         getUpdates(o).map { updates =>
-          (updates, updates.map(_.update_id).maxOption.orElse(Some(o)))
+          (updates, updates.map(_.update_id).maxOption.orElse(Some(o)).map(_+1))
         }
       }
       .flatMap(Stream.emits)
 
   private def getUpdates(offset: Long): F[List[Update]] =
     basicRequest
-      .get(uri"${config.baseUri}/bot${config.botKey}/getUpdates?offset=${offset + 1}&timeout=0.5&allowed_updates=[message]")
+      .get(uri"${config.baseUri}/bot${config.botKey}/getUpdates?offset=$offset&timeout=0.5&allowed_updates=[message]")
       .response(asJson[UpdateResponse[List[Update]]])
       .send()
       .flatMap { r =>
