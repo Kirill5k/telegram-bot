@@ -11,22 +11,22 @@ sealed trait BotCommand {
 
 object BotCommand {
   final case class Add(chatId: ChatId, username: Username, todo: String) extends BotCommand {
-    override def response: String = {
+    override val response: String = {
       val res = Random.shuffle(List("Ok", "Sure", "Noted", "Certainly")).head
       s"$res, ${username.value}. I have updated your todo-list"
     }
   }
 
   final case class Clear(chatId: ChatId, username: Username) extends BotCommand {
-    val response: String = "Your todo-list was cleared!"
+    override val response: String = "Your todo-list was cleared!"
   }
 
   final case class Show(chatId: ChatId, username: Username) extends BotCommand {
-    override def response: String = s"Sure thing, ${username.value}. Here is your current todo-list:"
+    override val response: String = s"Sure thing, ${username.value}. Here is your current todo-list:"
   }
 
   final case class Help(chatId: ChatId) extends BotCommand {
-    val response: String =
+    override val response: String =
       """
         |This bot manages your todo-list. Just write a command and the bot will respond to it! Commands:
         |"/list" - view your current todo-list
@@ -36,7 +36,7 @@ object BotCommand {
   }
 
   final case class Unknown(chatId: ChatId, command: String) extends BotCommand {
-    val response: String = s"""Unrecognized command "$command". type "/help" to see all available commands"""
+    override val response: String = s"""Unrecognized command "$command". type "/help" to see all available commands"""
   }
 
   def from(message: Message): Option[BotCommand] =
