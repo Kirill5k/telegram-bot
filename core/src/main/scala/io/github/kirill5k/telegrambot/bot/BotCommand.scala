@@ -1,6 +1,6 @@
 package io.github.kirill5k.telegrambot.bot
 
-import io.github.kirill5k.telegrambot.clients.{ChatId, Update, Username}
+import io.github.kirill5k.telegrambot.clients.{ChatId, Message, Username}
 
 import scala.util.Random
 
@@ -35,7 +35,16 @@ object BotCommand {
         |""".stripMargin
   }
 
-  final case class Unknown(chatId: ChatId) extends BotCommand {
-    val response: String = """Unrecognized command. type "/help" to see of available commands"""
+  final case class Unknown(chatId: ChatId, command: String) extends BotCommand {
+    val response: String = s"""Unrecognized command "$command". type "/help" to see all available commands"""
   }
+
+  def from(message: Message): Option[BotCommand] =
+    message.text.filter(_.startsWith("/")).map {
+      case c if c.startsWith("/list")  => Show(message.chat.id, message.from.username)
+      case c if c.startsWith("/clear") => Clear(message.chat.id, message.from.username)
+      case c if c.startsWith("/help")  => Help(message.chat.id)
+      case c if c.startsWith("/todo")  => Add(message.chat.id, message.from.username, c.substring(6))
+      case c                           => Unknown(message.chat.id, c.split(" ").head)
+    }
 }
