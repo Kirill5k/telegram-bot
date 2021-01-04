@@ -7,6 +7,7 @@ import io.chrisdavenport.log4cats.Logger
 import io.github.kirill5k.telegrambot.common.config.TelegramConfig
 import io.github.kirill5k.telegrambot.common.errors.AppError
 import io.circe.generic.auto._
+import io.github.kirill5k.telegrambot.common.json._
 import sttp.client._
 import sttp.client.circe._
 
@@ -18,18 +19,18 @@ final case class Update(update_id: Long, message: Option[Message])
 
 final case class UpdateResponse[T](ok: Boolean, result: T)
 
-trait TelegramClient[F[_]] {
+trait TelegramBotClient[F[_]] {
   def send(chatId: ChatId, text: String): F[Unit]
   def pollUpdates: Stream[F, Update]
 }
 
-final private class LiveTelegramClient[F[_]](
+final private class LiveTelegramBotClient[F[_]](
     private val config: TelegramConfig
 )(implicit
     val B: SttpBackend[F, Nothing, NothingT],
     val F: Sync[F],
     val L: Logger[F]
-) extends TelegramClient[F] {
+) extends TelegramBotClient[F] {
 
   override def send(chatId: ChatId, text: String): F[Unit] =
     basicRequest
@@ -68,11 +69,11 @@ final private class LiveTelegramClient[F[_]](
       }
 }
 
-object TelegramClient {
+object TelegramBotClient {
 
   def make[F[_]: Sync: Logger](
       config: TelegramConfig,
       backend: SttpBackend[F, Nothing, NothingT]
-  ): F[TelegramClient[F]] =
-    Sync[F].delay(new LiveTelegramClient[F](config)(B = backend, F = Sync[F], L = Logger[F]))
+  ): F[TelegramBotClient[F]] =
+    Sync[F].delay(new LiveTelegramBotClient[F](config)(B = backend, F = Sync[F], L = Logger[F]))
 }
