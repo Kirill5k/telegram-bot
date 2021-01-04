@@ -12,9 +12,11 @@ import sttp.client._
 import sttp.client.circe._
 
 final case class ChatId(value: Long) extends AnyVal
+final case class Username(value: String) extends AnyVal
 
 final case class Chat(id: ChatId)
-final case class Message(message_id: Long, chat: Chat, text: Option[String])
+final case class MessageOrigin(username: Username, is_bot: Boolean, id: Long)
+final case class Message(message_id: Long, chat: Chat, text: Option[String], from: MessageOrigin)
 final case class Update(update_id: Long, message: Option[Message])
 
 final case class UpdateResponse[T](ok: Boolean, result: T)
