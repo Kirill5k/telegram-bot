@@ -15,8 +15,7 @@ object config {
 
   final case class TelegramConfig(
       baseUri: String,
-      botKey: String,
-      chatId: ChatId
+      botKey: String
   )
 
   final case class AppConfig(

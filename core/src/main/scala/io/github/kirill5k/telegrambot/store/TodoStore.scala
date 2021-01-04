@@ -9,7 +9,9 @@ import io.github.kirill5k.telegrambot.clients.Username
 final case class TodoItem(
     id: Int,
     todo: String
-)
+) {
+  override def toString: String = s"$id: $todo"
+}
 
 trait TodoStore[F[_]] {
   def addItem(username: Username, todo: String): F[Unit]
