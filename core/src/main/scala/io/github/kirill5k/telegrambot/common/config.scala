@@ -1,7 +1,6 @@
 package io.github.kirill5k.telegrambot.common
 
 import cats.effect.{Blocker, ContextShift, Sync}
-import io.github.kirill5k.telegrambot.clients.ChatId
 import pureconfig.generic.auto._
 import pureconfig.module.catseffect.syntax._
 import pureconfig.ConfigSource

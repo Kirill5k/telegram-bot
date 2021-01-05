@@ -11,7 +11,7 @@ import io.github.kirill5k.telegrambot.TestUtil._
 class TelegramBotClientSpec extends SttpClientSpec {
 
   val message = "lorem ipsum dolor sit amet"
-  val config = TelegramConfig("http://telegram.com", "BOT-KEY", ChatId(42))
+  val config = TelegramConfig("http://telegram.com", "BOT-KEY")
 
   "TelegramClient" should {
 

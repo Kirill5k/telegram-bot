@@ -16,7 +16,7 @@ class TodoStoreSpec extends CatsSpec {
         items <- store.getItems(Username("u1"))
       } yield items
 
-      res.unsafeToFuture().map(_ mustBe List(TodoItem(0, "homework"), TodoItem(1, "exercise")))
+      res.unsafeToFuture().map(_ mustBe List(TodoItem("homework"), TodoItem("exercise")))
     }
 
     "clear all todo items from the store" in {

@@ -7,11 +7,8 @@ import cats.implicits._
 import io.github.kirill5k.telegrambot.clients.Username
 
 final case class TodoItem(
-    id: Int,
     todo: String
-) {
-  override def toString: String = s"$id: $todo"
-}
+)
 
 trait TodoStore[F[_]] {
   def addItem(username: Username, todo: String): F[Unit]
@@ -24,10 +21,7 @@ final private class InMemoryTodoStore[F[_]: Functor](
 ) extends TodoStore[F] {
 
   def addItem(username: Username, todo: String): F[Unit] =
-    store.update { items =>
-      val current = items.getOrElse(username, Nil)
-      items.updated(username, current :+ TodoItem(current.size, todo))
-    }
+    store.update(items => items.updated(username, items.getOrElse(username, Nil) :+ TodoItem(todo)))
 
   def getItems(username: Username): F[List[TodoItem]] =
     store.get.map(_.getOrElse(username, Nil))

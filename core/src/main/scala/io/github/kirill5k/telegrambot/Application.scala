@@ -1,17 +1,12 @@
 package io.github.kirill5k.telegrambot
 
-import cats.effect.{Blocker, ExitCode, IO, IOApp}
+import cats.effect.{ExitCode, IO, IOApp}
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import io.github.kirill5k.telegrambot.bot.TelegramTodoBot
 import io.github.kirill5k.telegrambot.clients.TelegramBotClient
 import io.github.kirill5k.telegrambot.common.config.AppConfig
 import io.github.kirill5k.telegrambot.store.TodoStore
-import org.http4s.server.blaze.BlazeServerBuilder
-import org.http4s.implicits._
-import org.http4s.server.Router
-
-import scala.concurrent.ExecutionContext
 
 object Application extends IOApp {
 
