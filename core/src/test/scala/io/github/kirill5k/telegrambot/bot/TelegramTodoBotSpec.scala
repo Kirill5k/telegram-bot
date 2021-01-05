@@ -50,6 +50,25 @@ class TelegramTodoBotSpec extends CatsSpec {
       }
     }
 
+    "handle invalid syntax when adding new todos" in {
+      val (client, store) = mocks
+
+      when(client.pollUpdates).thenReturn(Stream.emit(update(Some("/todo-foo-bar"))))
+      when(client.send(any[ChatId], any[String])).thenReturn(IO.unit)
+
+      val res = for {
+        bot <- TelegramTodoBot.make(client, store)
+        _   <- bot.run.take(1).compile.drain
+      } yield ()
+
+      res.unsafeToFuture().map { r =>
+        verify(client).pollUpdates
+        verifyNoMoreInteractions(store)
+        verify(client).send(ChatId(42), """Unable to add new todo item. Missing the actual item. Use "/help" for more information""")
+        r mustBe ()
+      }
+    }
+
     "clear current todos" in {
       val (client, store) = mocks
 

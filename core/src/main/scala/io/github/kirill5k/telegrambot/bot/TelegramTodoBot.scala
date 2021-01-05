@@ -32,13 +32,13 @@ final private class LiveTelegramTodoBot[F[_]: Monad](
     case c @ BotCommand.Show(chatId, username) =>
       todoStore
         .getItems(username)
-        .map(_.zipWithIndex.map{case (t,i) => s"\t${i+1}: ${t.todo}"})
+        .map(_.zipWithIndex.map { case (t, i) => s"\t${i + 1}: ${t.todo}" })
         .map(items => (c.response :: items).mkString("\n"))
         .flatMap(items => telegramBotClient.send(chatId, items))
     case c @ BotCommand.Help(chatId) =>
       telegramBotClient.send(chatId, c.response)
-    case c @ BotCommand.Unknown(chatId, _) =>
-      telegramBotClient.send(chatId, c.response)
+    case c =>
+      telegramBotClient.send(c.chatId, c.response)
   }
 
   override def run: Stream[F, Unit] =

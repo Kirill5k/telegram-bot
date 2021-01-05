@@ -35,16 +35,30 @@ object BotCommand {
         |""".stripMargin
   }
 
+  final case class Error(chatId: ChatId, error: String) extends BotCommand {
+    override def response: String = error
+  }
+
   final case class Unknown(chatId: ChatId, command: String) extends BotCommand {
     override val response: String = s"""Unrecognized command "$command". type "/help" to see all available commands"""
   }
 
+  private val TodoRegex = "/todo ([\\w\\d]+)".r
+
   def from(message: Message): Option[BotCommand] =
     message.text.filter(_.startsWith("/")).map {
-      case c if c.startsWith("/show")  => Show(message.chat.id, message.from.username)
-      case c if c.startsWith("/clear") => Clear(message.chat.id, message.from.username)
-      case c if c.startsWith("/help")  => Help(message.chat.id)
-      case c if c.startsWith("/todo")  => Add(message.chat.id, message.from.username, c.substring(6))
-      case c                           => Unknown(message.chat.id, c.split(" ").head)
+      case c if c.startsWith("/show") =>
+        Show(message.chat.id, message.from.username)
+      case c if c.startsWith("/clear") =>
+        Clear(message.chat.id, message.from.username)
+      case c if c.startsWith("/help") =>
+        Help(message.chat.id)
+      case c if c.startsWith("/todo") =>
+        c match {
+          case TodoRegex(todo) => Add(message.chat.id, message.from.username, todo)
+          case _               => Error(message.chat.id, """Unable to add new todo item. Missing the actual item. Use "/help" for more information""")
+        }
+      case c =>
+        Unknown(message.chat.id, c.split(" ").head)
     }
 }
