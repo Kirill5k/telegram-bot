@@ -32,7 +32,7 @@ final private class LiveTelegramTodoBot[F[_]: Monad](
     case c @ BotCommand.Show(chatId, username) =>
       todoStore
         .getItems(username)
-        .map(_.zipWithIndex.map{case (t,i) => s"\t$i: ${t.todo}"})
+        .map(_.zipWithIndex.map{case (t,i) => s"\t${i+1}: ${t.todo}"})
         .map(items => (c.response :: items).mkString("\n"))
         .flatMap(items => telegramBotClient.send(chatId, items))
     case c @ BotCommand.Help(chatId) =>

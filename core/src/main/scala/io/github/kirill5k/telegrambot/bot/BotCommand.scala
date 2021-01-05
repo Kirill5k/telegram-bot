@@ -29,7 +29,7 @@ object BotCommand {
     override val response: String =
       """
         |This bot manages your todo-list. Just write a command and the bot will respond to it! Commands:
-        |"/list" - view your current todo-list
+        |"/show" - view your current todo-list
         |"/clear" - clear your current todo-list
         |"/todo <todo-item>" - add a <todo-item> to your list
         |""".stripMargin
@@ -41,7 +41,7 @@ object BotCommand {
 
   def from(message: Message): Option[BotCommand] =
     message.text.filter(_.startsWith("/")).map {
-      case c if c.startsWith("/list")  => Show(message.chat.id, message.from.username)
+      case c if c.startsWith("/show")  => Show(message.chat.id, message.from.username)
       case c if c.startsWith("/clear") => Clear(message.chat.id, message.from.username)
       case c if c.startsWith("/help")  => Help(message.chat.id)
       case c if c.startsWith("/todo")  => Add(message.chat.id, message.from.username, c.substring(6))
