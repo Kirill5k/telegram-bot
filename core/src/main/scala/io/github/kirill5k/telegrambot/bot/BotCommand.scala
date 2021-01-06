@@ -48,7 +48,7 @@ object BotCommand {
 
   def from(message: Message): Option[BotCommand] =
     message.text.filter(_.startsWith("/")).map {
-      case c if c.startsWith("/show") =>
+      case c if c.startsWith("/show") | c.startsWith("/start") =>
         Show(message.chat.id)
       case c if c.startsWith("/clear") =>
         Clear(message.chat.id)
