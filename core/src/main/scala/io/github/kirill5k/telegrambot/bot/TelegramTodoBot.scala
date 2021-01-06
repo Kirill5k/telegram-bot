@@ -27,13 +27,13 @@ final private class LiveTelegramTodoBot[F[_]: Monad: Logger](
       .unNone
 
   private def processCommand(command: BotCommand): F[Unit] = command match {
-    case c @ BotCommand.Add(chatId, username, todo) =>
-      todoStore.addItem(username, todo) *> telegramBotClient.send(chatId, c.response)
-    case c @ BotCommand.Clear(chatId, username) =>
-      todoStore.clear(username) *> telegramBotClient.send(chatId, c.response)
-    case c @ BotCommand.Show(chatId, username) =>
+    case c @ BotCommand.Add(chatId, todo) =>
+      todoStore.addItem(chatId, todo) *> telegramBotClient.send(chatId, c.response)
+    case c @ BotCommand.Clear(chatId) =>
+      todoStore.clear(chatId) *> telegramBotClient.send(chatId, c.response)
+    case c @ BotCommand.Show(chatId) =>
       todoStore
-        .getItems(username)
+        .getItems(chatId)
         .map(_.zipWithIndex.map { case (t, i) => s"\t${i + 1}: ${t.todo}" })
         .map(items => (c.response :: items).mkString("\n"))
         .flatMap(items => telegramBotClient.send(chatId, items))

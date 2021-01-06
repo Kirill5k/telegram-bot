@@ -1,10 +1,10 @@
 package io.github.kirill5k.telegrambot.bot
 
 import cats.effect.IO
-import io.github.kirill5k.telegrambot.CatsSpec
-import io.github.kirill5k.telegrambot.clients.{Chat, ChatId, Message, MessageOrigin, TelegramBotClient, Update, Username}
-import io.github.kirill5k.telegrambot.store.{TodoItem, TodoStore}
 import fs2.Stream
+import io.github.kirill5k.telegrambot.CatsSpec
+import io.github.kirill5k.telegrambot.clients._
+import io.github.kirill5k.telegrambot.store.{TodoItem, TodoStore}
 
 class TelegramTodoBotSpec extends CatsSpec {
 
@@ -14,7 +14,7 @@ class TelegramTodoBotSpec extends CatsSpec {
       val (client, store) = mocks
 
       when(client.pollUpdates).thenReturn(Stream.emit(update(Some("/show"))))
-      when(store.getItems(any[Username])).thenReturn(IO.pure(List(TodoItem("homework"), TodoItem("exercise"))))
+      when(store.getItems(any[ChatId])).thenReturn(IO.pure(List(TodoItem("homework"), TodoItem("exercise"))))
       when(client.send(any[ChatId], any[String])).thenReturn(IO.unit)
 
       val res = for {
@@ -24,8 +24,8 @@ class TelegramTodoBotSpec extends CatsSpec {
 
       res.unsafeToFuture().map { r =>
         verify(client).pollUpdates
-        verify(store).getItems(Username("Boris"))
-        verify(client).send(ChatId(42), "Sure thing, Boris. Here is your current todo-list:\n\t1: homework\n\t2: exercise")
+        verify(store).getItems(ChatId(42L))
+        verify(client).send(ChatId(42), "Sure thing. Here is your current todo-list:\n\t1: homework\n\t2: exercise")
         r mustBe ()
       }
     }
@@ -34,7 +34,7 @@ class TelegramTodoBotSpec extends CatsSpec {
       val (client, store) = mocks
 
       when(client.pollUpdates).thenReturn(Stream.emit(update(Some("/todo homework"))))
-      when(store.addItem(any[Username], any[String])).thenReturn(IO.unit)
+      when(store.addItem(any[ChatId], any[TodoItem])).thenReturn(IO.unit)
       when(client.send(any[ChatId], any[String])).thenReturn(IO.unit)
 
       val res = for {
@@ -44,8 +44,8 @@ class TelegramTodoBotSpec extends CatsSpec {
 
       res.unsafeToFuture().map { r =>
         verify(client).pollUpdates
-        verify(store).addItem(Username("Boris"), "homework")
-        verify(client).send(eqTo(ChatId(42)), endsWith("Boris. I have updated your todo-list"))
+        verify(store).addItem(ChatId(42L), TodoItem("homework"))
+        verify(client).send(eqTo(ChatId(42)), endsWith("I have updated your todo-list"))
         r mustBe ()
       }
     }
@@ -73,7 +73,7 @@ class TelegramTodoBotSpec extends CatsSpec {
       val (client, store) = mocks
 
       when(client.pollUpdates).thenReturn(Stream.emit(update(Some("/clear"))))
-      when(store.clear(any[Username])).thenReturn(IO.unit)
+      when(store.clear(any[ChatId])).thenReturn(IO.unit)
       when(client.send(any[ChatId], any[String])).thenReturn(IO.unit)
 
       val res = for {
@@ -83,7 +83,7 @@ class TelegramTodoBotSpec extends CatsSpec {
 
       res.unsafeToFuture().map { r =>
         verify(client).pollUpdates
-        verify(store).clear(Username("Boris"))
+        verify(store).clear(ChatId(42L))
         verify(client).send(ChatId(42), "Your todo-list was cleared!")
         r mustBe ()
       }
@@ -176,7 +176,7 @@ class TelegramTodoBotSpec extends CatsSpec {
         1L,
         Chat(ChatId(42)),
         text,
-        MessageOrigin(Username("Boris"), Some("Boris"), isBot, 1L)
+        MessageOrigin(Some(Username("Boris")), Some("Boris"), isBot, 1L)
       ))
     )
 }

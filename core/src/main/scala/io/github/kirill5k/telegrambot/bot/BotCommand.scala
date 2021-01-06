@@ -1,6 +1,7 @@
 package io.github.kirill5k.telegrambot.bot
 
-import io.github.kirill5k.telegrambot.clients.{ChatId, Message, Username}
+import io.github.kirill5k.telegrambot.clients.{ChatId, Message}
+import io.github.kirill5k.telegrambot.store.TodoItem
 
 import scala.util.Random
 
@@ -10,19 +11,19 @@ sealed trait BotCommand {
 }
 
 object BotCommand {
-  final case class Add(chatId: ChatId, username: Username, todo: String) extends BotCommand {
+  final case class Add(chatId: ChatId, todo: TodoItem) extends BotCommand {
     override val response: String = {
       val res = Random.shuffle(List("Ok", "Sure", "Noted", "Certainly")).head
-      s"$res, ${username.value}. I have updated your todo-list"
+      s"$res. I have updated your todo-list"
     }
   }
 
-  final case class Clear(chatId: ChatId, username: Username) extends BotCommand {
+  final case class Clear(chatId: ChatId) extends BotCommand {
     override val response: String = "Your todo-list was cleared!"
   }
 
-  final case class Show(chatId: ChatId, username: Username) extends BotCommand {
-    override val response: String = s"Sure thing, ${username.value}. Here is your current todo-list:"
+  final case class Show(chatId: ChatId) extends BotCommand {
+    override val response: String = s"Sure thing. Here is your current todo-list:"
   }
 
   final case class Help(chatId: ChatId) extends BotCommand {
@@ -48,14 +49,14 @@ object BotCommand {
   def from(message: Message): Option[BotCommand] =
     message.text.filter(_.startsWith("/")).map {
       case c if c.startsWith("/show") =>
-        Show(message.chat.id, message.from.username)
+        Show(message.chat.id)
       case c if c.startsWith("/clear") =>
-        Clear(message.chat.id, message.from.username)
+        Clear(message.chat.id)
       case c if c.startsWith("/help") =>
         Help(message.chat.id)
       case c if c.startsWith("/todo") =>
         c match {
-          case TodoRegex(todo) => Add(message.chat.id, message.from.username, todo)
+          case TodoRegex(todo) => Add(message.chat.id, TodoItem(todo))
           case _               => Error(message.chat.id, """Unable to add new todo item. Missing the actual item. Use "/help" for more information""")
         }
       case c =>

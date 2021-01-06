@@ -1,6 +1,7 @@
 package io.github.kirill5k.telegrambot.bot
 
 import io.github.kirill5k.telegrambot.clients.{Chat, ChatId, Message, MessageOrigin, Username}
+import io.github.kirill5k.telegrambot.store.TodoItem
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -23,7 +24,7 @@ class BotCommandSpec extends AnyWordSpec with Matchers {
     "create Add command from message" in {
       val msg = message(Some("/todo clean room"))
 
-      BotCommand.from(msg) mustBe Some(BotCommand.Add(ChatId(42), Username("u1"), "clean room"))
+      BotCommand.from(msg) mustBe Some(BotCommand.Add(ChatId(42), TodoItem("clean room")))
     }
   }
 
@@ -32,6 +33,6 @@ class BotCommandSpec extends AnyWordSpec with Matchers {
       1L,
       Chat(ChatId(42L)),
       text,
-      MessageOrigin(Username("u1"), Some("user-1"), false, 2L)
+      MessageOrigin(Some(Username("u1")), Some("user-1"), false, 2L)
     )
 }
