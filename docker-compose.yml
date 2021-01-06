@@ -5,4 +5,5 @@ services:
     image: telegram-bot-core:latest
     environment:
       PORT: "9090"
+
     restart: always

@@ -32,6 +32,6 @@ class BotCommandSpec extends AnyWordSpec with Matchers {
       1L,
       Chat(ChatId(42L)),
       text,
-      MessageOrigin(Username("u1"), false, 2L)
+      MessageOrigin(Username("u1"), Some("user-1"), false, 2L)
     )
 }

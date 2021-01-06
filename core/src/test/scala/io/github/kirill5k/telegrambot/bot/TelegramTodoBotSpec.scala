@@ -176,7 +176,7 @@ class TelegramTodoBotSpec extends CatsSpec {
         1L,
         Chat(ChatId(42)),
         text,
-        MessageOrigin(Username("Boris"), isBot, 1L)
+        MessageOrigin(Username("Boris"), Some("Boris"), isBot, 1L)
       ))
     )
 }

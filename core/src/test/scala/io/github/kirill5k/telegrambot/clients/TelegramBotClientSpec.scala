@@ -48,9 +48,9 @@ class TelegramBotClientSpec extends SttpClientSpec {
     "poll updates continuously" in {
       val testingBackend: SttpBackend[IO, Nothing, NothingT] = backendStub
         .whenRequestMatchesPartial {
-          case r if isGoingTo(r, Method.GET, "telegram.com", List("botBOT-KEY", "getUpdates"), Map("offset" -> "0", "timeout" -> "0.5", "allowed_updates" -> "[message]")) =>
+          case r if isGoingTo(r, Method.GET, "telegram.com", List("botBOT-KEY", "getUpdates"), Map("offset" -> "0", "timeout" -> "0.5", "allowed_updates" -> "[]")) =>
             Response.ok(readFile("telegram-bot-updates-1.json"))
-          case r if isGoingTo(r, Method.GET, "telegram.com", List("botBOT-KEY", "getUpdates"), Map("offset" -> "2", "timeout" -> "0.5", "allowed_updates" -> "[message]")) =>
+          case r if isGoingTo(r, Method.GET, "telegram.com", List("botBOT-KEY", "getUpdates"), Map("offset" -> "2", "timeout" -> "0.5", "allowed_updates" -> "[]")) =>
             Response.ok(readFile("telegram-bot-updates-2.json"))
           case _ => throw new RuntimeException()
         }
@@ -62,6 +62,24 @@ class TelegramBotClientSpec extends SttpClientSpec {
 
       result.unsafeToFuture().map { upd =>
         upd must have size 3
+      }
+    }
+
+    "return json error when failed to parse" in {
+      val testingBackend: SttpBackend[IO, Nothing, NothingT] = backendStub
+        .whenRequestMatchesPartial {
+          case r if isGoingTo(r, Method.GET, "telegram.com", List("botBOT-KEY", "getUpdates"), Map("offset" -> "0", "timeout" -> "0.5", "allowed_updates" -> "[]")) =>
+            Response.ok("""{"foo":"bar"}""")
+          case _ => throw new RuntimeException()
+        }
+
+      val result = for {
+        client <- TelegramBotClient.make(config, testingBackend)
+        res <- client.pollUpdates.take(1).compile.drain.attempt
+      } yield res
+
+      result.unsafeToFuture().map { res =>
+        res mustBe Left(AppError.Json("""{"foo":"bar"}""", "Attempt to decode value on failed cursor: DownField(ok)"))
       }
     }
   }

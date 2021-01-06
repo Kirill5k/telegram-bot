@@ -4,6 +4,7 @@ import cats.Monad
 import cats.effect.Sync
 import cats.implicits._
 import fs2.Stream
+import io.chrisdavenport.log4cats.Logger
 import io.github.kirill5k.telegrambot.clients.TelegramBotClient
 import io.github.kirill5k.telegrambot.store.TodoStore
 
@@ -11,13 +12,14 @@ trait TelegramTodoBot[F[_]] {
   def run: Stream[F, Unit]
 }
 
-final private class LiveTelegramTodoBot[F[_]: Monad](
+final private class LiveTelegramTodoBot[F[_]: Monad: Logger](
     private val telegramBotClient: TelegramBotClient[F],
     private val todoStore: TodoStore[F]
 ) extends TelegramTodoBot[F] {
 
   private def pollCommands: Stream[F, BotCommand] =
     telegramBotClient.pollUpdates
+      .evalTap(m => Logger[F].info(m.toString))
       .map(_.message)
       .unNone
       .filter(!_.from.is_bot)
@@ -42,11 +44,15 @@ final private class LiveTelegramTodoBot[F[_]: Monad](
   }
 
   override def run: Stream[F, Unit] =
-    pollCommands.evalMap(processCommand)
+    pollCommands
+      .evalMap(processCommand)
+      .handleErrorWith { error =>
+        Stream.eval_(Logger[F].error(error)("Error during message processing")) ++ run
+      }
 }
 
 object TelegramTodoBot {
-  def make[F[_]: Sync](
+  def make[F[_]: Sync: Logger](
       telegramBotClient: TelegramBotClient[F],
       todoStore: TodoStore[F]
   ): F[TelegramTodoBot[F]] =

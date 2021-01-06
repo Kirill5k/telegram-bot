@@ -18,7 +18,7 @@ object Application extends IOApp {
         config <- AppConfig.load[IO](res.blocker) <* logger.info("loaded config")
         client <- TelegramBotClient.make[IO](config.telegram, res.httpClientBackend)
         store <- TodoStore.inMemory[IO]
-        bot <- TelegramTodoBot.make(client, store)
+        bot <- TelegramTodoBot.make(client, store) <* logger.info("starting telegram todo bot")
         _ <- bot.run.compile.drain
       } yield ExitCode.Success
     }

@@ -15,7 +15,7 @@ final case class ChatId(value: Long) extends AnyVal
 final case class Username(value: String) extends AnyVal
 
 final case class Chat(id: ChatId)
-final case class MessageOrigin(username: Username, is_bot: Boolean, id: Long)
+final case class MessageOrigin(username: Username, first_name: Option[String], is_bot: Boolean, id: Long)
 final case class Message(message_id: Long, chat: Chat, text: Option[String], from: MessageOrigin)
 final case class Update(update_id: Long, message: Option[Message])
 
@@ -58,14 +58,18 @@ final private class LiveTelegramBotClient[F[_]](
 
   private def getUpdates(offset: Long): F[List[Update]] =
     basicRequest
-      .get(uri"${config.baseUri}/bot${config.botKey}/getUpdates?offset=$offset&timeout=0.5&allowed_updates=[message]")
+      .get(uri"${config.baseUri}/bot${config.botKey}/getUpdates?offset=$offset&timeout=0.5&allowed_updates=[]")
       .response(asJson[UpdateResponse[List[Update]]])
       .send()
       .flatMap { r =>
         r.body match {
-          case Right(res) => res.result.pure[F]
+          case Right(res) =>
+            res.result.pure[F]
+          case Left(DeserializationError(body, error)) =>
+            L.error(s"error deserializing message from telegram: ${error.getMessage}\n${body}") *>
+              F.raiseError(AppError.Json(body, error.getMessage))
           case Left(error) =>
-            L.error(s"error getting updates from telegram: ${r.code}\n$error") *>
+            L.error(s"error getting updates from telegram: ${r.code}\n$error\n${error}") *>
               F.raiseError(AppError.Http(r.code.code, s"error getting updates from telegram: ${error.getMessage}"))
         }
       }
