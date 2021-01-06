@@ -11,23 +11,34 @@ final case class TodoItem(
 )
 
 trait TodoStore[F[_]] {
-  def addItem(pid: ChatId, todo: TodoItem): F[Unit]
-  def getItems(pid: ChatId): F[List[TodoItem]]
-  def clear(pid: ChatId): F[Unit]
+  def addItem(cid: ChatId, todo: TodoItem): F[Unit]
+  def getItems(cid: ChatId): F[List[TodoItem]]
+  def clearOne(cid: ChatId, index: Int): F[Unit]
+  def clearAll(cid: ChatId): F[Unit]
 }
 
 final private class InMemoryTodoStore[F[_]: Functor](
     private val store: Ref[F, Map[ChatId, List[TodoItem]]]
 ) extends TodoStore[F] {
 
-  def addItem(pid: ChatId, todo: TodoItem): F[Unit] =
-    store.update(items => items.updated(pid, items.getOrElse(pid, Nil) :+ todo))
+  def addItem(cid: ChatId, todo: TodoItem): F[Unit] =
+    store.update(items => items.updated(cid, items.getOrElse(cid, Nil) :+ todo))
 
-  def getItems(pid: ChatId): F[List[TodoItem]] =
-    store.get.map(_.getOrElse(pid, Nil))
+  def getItems(cid: ChatId): F[List[TodoItem]] =
+    store.get.map(_.getOrElse(cid, Nil))
 
-  def clear(pid: ChatId): F[Unit] =
-    store.update(_.removed(pid))
+  def clearAll(cid: ChatId): F[Unit] =
+    store.update(_.removed(cid))
+
+  override def clearOne(cid: ChatId, index: Int): F[Unit] =
+    store.update{ items =>
+      val ts = items.getOrElse(cid, Nil)
+      val res = if (ts.size < index) ts else {
+        val (left, right) = ts.splitAt(index)
+        left ::: right.tail
+      }
+      items.updated(cid, res)
+    }
 }
 
 object TodoStore {

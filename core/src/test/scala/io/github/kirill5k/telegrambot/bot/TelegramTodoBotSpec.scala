@@ -73,7 +73,7 @@ class TelegramTodoBotSpec extends CatsSpec {
       val (client, store) = mocks
 
       when(client.pollUpdates).thenReturn(Stream.emit(update(Some("/clear"))))
-      when(store.clear(any[ChatId])).thenReturn(IO.unit)
+      when(store.clearAll(any[ChatId])).thenReturn(IO.unit)
       when(client.send(any[ChatId], any[String])).thenReturn(IO.unit)
 
       val res = for {
@@ -83,7 +83,7 @@ class TelegramTodoBotSpec extends CatsSpec {
 
       res.unsafeToFuture().map { r =>
         verify(client).pollUpdates
-        verify(store).clear(ChatId(42L))
+        verify(store).clearAll(ChatId(42L))
         verify(client).send(ChatId(42), "Your todo-list was cleared!")
         r mustBe ()
       }

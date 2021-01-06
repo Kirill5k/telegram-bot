@@ -31,8 +31,8 @@ object BotCommand {
       """
         |This bot manages your todo-list. Just write a command and the bot will respond to it! Commands:
         |"/show" - view your current todo-list
-        |"/clear" - clear your current todo-list
         |"/todo <todo-item>" - add a <todo-item> to your list
+        |"/clear" - clear your current todo-list
         |""".stripMargin
   }
 
