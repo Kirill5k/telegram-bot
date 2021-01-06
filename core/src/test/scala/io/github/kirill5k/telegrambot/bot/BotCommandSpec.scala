@@ -26,6 +26,12 @@ class BotCommandSpec extends AnyWordSpec with Matchers {
 
       BotCommand.from(msg) mustBe Some(BotCommand.Add(ChatId(42), TodoItem("clean room")))
     }
+
+    "return error when can't add new item" in {
+      val msg = message(Some("/todo "))
+
+      BotCommand.from(msg) mustBe Some(BotCommand.Error(ChatId(42), "Unable to add new todo item. Missing the actual item. Use \"/help\" for more information"))
+    }
   }
 
   def message(text: Option[String]): Message =
@@ -33,6 +39,6 @@ class BotCommandSpec extends AnyWordSpec with Matchers {
       1L,
       Chat(ChatId(42L)),
       text,
-      MessageOrigin(Some(Username("u1")), Some("user-1"), false, 2L)
+      Some(MessageOrigin(Some(Username("u1")), Some("user-1"), false, 2L))
     )
 }

@@ -20,9 +20,9 @@ final private class LiveTelegramTodoBot[F[_]: Monad: Logger](
   private def pollCommands: Stream[F, BotCommand] =
     telegramBotClient.pollUpdates
       .evalTap(m => Logger[F].info(m.toString))
-      .map(_.message)
+      .map(upd => upd.message.orElse(upd.channel_post))
       .unNone
-      .filter(!_.from.is_bot)
+      .filter(!_.from.exists(_.is_bot))
       .map(BotCommand.from)
       .unNone
 

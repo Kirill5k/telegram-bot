@@ -16,8 +16,8 @@ final case class Username(value: String) extends AnyVal
 
 final case class Chat(id: ChatId)
 final case class MessageOrigin(username: Option[Username], first_name: Option[String], is_bot: Boolean, id: Long)
-final case class Message(message_id: Long, chat: Chat, text: Option[String], from: MessageOrigin)
-final case class Update(update_id: Long, message: Option[Message])
+final case class Message(message_id: Long, chat: Chat, text: Option[String], from: Option[MessageOrigin])
+final case class Update(update_id: Long, message: Option[Message], channel_post: Option[Message])
 
 final case class UpdateResponse[T](ok: Boolean, result: T)
 

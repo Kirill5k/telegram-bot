@@ -44,7 +44,7 @@ object BotCommand {
     override val response: String = s"""Unrecognized command "$command". type "/help" to see all available commands"""
   }
 
-  private val TodoRegex = "/todo ([\\w\\d]+)".r
+  private val TodoRegex = "/todo (.+)".r
 
   def from(message: Message): Option[BotCommand] =
     message.text.filter(_.startsWith("/")).map {
