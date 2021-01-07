@@ -31,6 +31,8 @@ final private class LiveTelegramTodoBot[F[_]: Monad: Logger](
       todoStore.addItem(chatId, todo) *> telegramBotClient.send(chatId, c.response)
     case c @ BotCommand.ClearAll(chatId) =>
       todoStore.clearAll(chatId) *> telegramBotClient.send(chatId, c.response)
+    case c @ BotCommand.ClearOne(chatId, index) =>
+      todoStore.clearOne(chatId, index) *> telegramBotClient.send(chatId, c.response)
     case c @ BotCommand.Show(chatId) =>
       todoStore
         .getItems(chatId)
