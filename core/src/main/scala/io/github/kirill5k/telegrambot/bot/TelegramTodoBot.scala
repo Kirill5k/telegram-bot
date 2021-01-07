@@ -29,7 +29,7 @@ final private class LiveTelegramTodoBot[F[_]: Monad: Logger](
   private def processCommand(command: BotCommand): F[Unit] = command match {
     case c @ BotCommand.Add(chatId, todo) =>
       todoStore.addItem(chatId, todo) *> telegramBotClient.send(chatId, c.response)
-    case c @ BotCommand.Clear(chatId) =>
+    case c @ BotCommand.ClearAll(chatId) =>
       todoStore.clearAll(chatId) *> telegramBotClient.send(chatId, c.response)
     case c @ BotCommand.Show(chatId) =>
       todoStore

@@ -32,6 +32,18 @@ class BotCommandSpec extends AnyWordSpec with Matchers {
 
       BotCommand.from(msg) mustBe Some(BotCommand.Error(ChatId(42), "Unable to add new todo item. Missing the actual item. Use \"/help\" for more information"))
     }
+
+    "return error when can't clear item" in {
+      val msg = message(Some("/clear foo"))
+
+      BotCommand.from(msg) mustBe Some(BotCommand.Error(ChatId(42), "Unable to remove todo item. The index is invalid. Use \"/help\" for more information"))
+    }
+
+    "create clear one command" in {
+      val msg = message(Some("/clear 1"))
+
+      BotCommand.from(msg) mustBe Some(BotCommand.ClearOne(ChatId(42), 0))
+    }
   }
 
   def message(text: Option[String]): Message =

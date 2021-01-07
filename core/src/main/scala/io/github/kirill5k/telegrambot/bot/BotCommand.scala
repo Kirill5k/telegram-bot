@@ -18,7 +18,11 @@ object BotCommand {
     }
   }
 
-  final case class Clear(chatId: ChatId) extends BotCommand {
+  final case class ClearOne(chatId: ChatId, index: Int) extends BotCommand {
+    override val response: String = s"Todo item #${index+1} has been removed from the list."
+  }
+
+  final case class ClearAll(chatId: ChatId) extends BotCommand {
     override val response: String = "Your todo-list was cleared!"
   }
 
@@ -32,7 +36,8 @@ object BotCommand {
         |This bot manages your todo-list. Just write a command and the bot will respond to it! Commands:
         |"/show" - view your current todo-list
         |"/todo <todo-item>" - add a <todo-item> to your list
-        |"/clear" - clear your current todo-list
+        |"/clear <#>" - clear single item from your current todo-list, where # represents item's number
+        |"/clear-all" - clear your current todo-list
         |""".stripMargin
   }
 
@@ -45,13 +50,19 @@ object BotCommand {
   }
 
   private val TodoRegex = "/todo (.+)".r
+  private val ClearRegex = "/clear (\\d{1,100})".r
 
   def from(message: Message): Option[BotCommand] =
     message.text.filter(_.startsWith("/")).map {
       case c if c.startsWith("/show") | c.startsWith("/start") =>
         Show(message.chat.id)
+      case c if c.startsWith("/clear-all") =>
+        ClearAll(message.chat.id)
       case c if c.startsWith("/clear") =>
-        Clear(message.chat.id)
+        c match {
+          case ClearRegex(index) => ClearOne(message.chat.id, index.toInt-1)
+          case _ => Error(message.chat.id, """Unable to remove todo item. The index is invalid. Use "/help" for more information""")
+        }
       case c if c.startsWith("/help") =>
         Help(message.chat.id)
       case c if c.startsWith("/todo") =>
